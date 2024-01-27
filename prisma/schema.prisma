@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String
+  password String
+  role     Roles  @default(BASIC)
+
+  Owner Owners?
+}
+
+model Owners {
+  id Int @id @default(autoincrement())
+  firstName String
+  lastName String
+  gender Genders
+  birthDate String
+  phone String
+  
+  userID Int @unique
+  user User @relation(fields: [userID], references: [id])
+
+  Stores Stores[]
+}
+
+enum Genders {
+  Masculino
+  Feminino
+}
+
+enum Roles {
+  BASIC
+  ADMIN
+}
+
+model Products {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+
+  subcategoryID Int
+  subcategory   Subcategories @relation(fields: [subcategoryID], references: [id])
+
+  ProductDetails ProductDetails[]
+  Images Images[]
+}
+
+model ProductDetails {
+  id         Int     @id @default(autoincrement())
+  photo      String
+  brandID    Int
+  modelID    Int?
+  colorName  String?
+  colorValue String?
+
+  productID Int
+  product Products @relation(fields: [productID], references: [id])
+}
+
+model Stores {
+  id          Int    @id @default(autoincrement())
+  name        String
+  address     String
+  phoneNumber String
+  email       String
+  description String
+
+  ownerID         Int
+  owner Owners @relation(fields: [ownerID], references: [id])
+
+  customization Customization?
+}
+
+model Categories {
+  id            Int             @id @default(autoincrement())
+  name          String
+  Subcategories Subcategories[]
+}
+
+model Subcategories {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  categoryID Int?
+  category   Categories? @relation(fields: [categoryID], references: [id])
+
+  Products   Products[]
+}
+
+model Brands {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  Models  Models[]
+}
+
+model Models {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  brandID Int
+  brand Brands @relation(fields: [brandID], references: [id])
+}
+
+model Customization {
+  id         Int    @id @default(autoincrement())
+  themeColor String
+  logoUrl    String
+
+  storeID Int @unique
+  store Stores @relation(fields: [storeID], references: [id])
+}
+
+model Images {
+  id       Int    @id @default(autoincrement())
+  name     String
+  imageUrl String
+
+  productID Int
+  product Products @relation(fields: [productID], references: [id])
+}
